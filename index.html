@@ -502,7 +502,7 @@ function renderChips(){
     const b = document.createElement("button");
     b.type = "button"; b.textContent = label(who, s);
     if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = s; b.appendChild(sm); }
-    b.onclick = () => { const i = $("#say"); i.value = (i.value ? i.value + " " : "") + label(who, s); updateGo(); bop(); };
+    b.onclick = () => { const i = $("#say"); i.value = (i.value && !done ? i.value + " " : "") + label(who, s); done = false; updateGo(); bop(); };
     box.appendChild(b);
   }
 }
@@ -537,7 +537,14 @@ function scrollToResult(){
     r.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"});
   });
 }
-$("#go").onclick = () => { last = $("#say").value.trim(); renderResult(); scrollToResult(); };
+// 통역이 한 번 끝나면(done) 다음 소리 버튼·🎤는 입력을 새로 시작한다. 통역 전에는 소리 버튼을 이어 붙여 조합할 수 있다.
+let done = false;
+$("#go").onclick = () => { last = $("#say").value.trim(); renderResult(); scrollToResult(); done = true; };
+// 통역 후 입력 칸을 누르면 기존 글자를 선택해 두어, 바로 치거나 받아쓰면 덮어쓰게 한다
+$("#say").addEventListener("focus", () => {
+  if(!done) return;
+  const i = $("#say"); setTimeout(() => { try{ i.setSelectionRange(0, i.value.length); }catch(_){} }, 0);
+});
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 // claude.ai 안에서는 프레임에 마이크 권한이 없어 차단됨 → 키보드/OS 받아쓰기로 안내
@@ -558,20 +565,22 @@ function dictateMode(){
 const mic = $("#mic"); mic.hidden = false;
 let rec = null;
 mic.onclick = () => {
+  if(done && !rec){ $("#say").value = ""; done = false; updateGo(); }
   if(!useSR){ dictateMode(); return; }
   if(rec){ rec.stop(); return; }
   rec = new SR(); rec.lang = lang === "ko" ? "ko-KR" : "ja-JP"; rec.interimResults = false; rec.maxAlternatives = 1;
   mic.classList.add("rec"); $("#say").placeholder = UI[lang].listening;
-  rec.onresult = e => { const heard = e.results[0][0].transcript; $("#say").value = heard; updateGo(); bop(); last = heard; renderResult(); };
+  rec.onresult = e => { const heard = e.results[0][0].transcript; $("#say").value = heard; updateGo(); bop(); last = heard; renderResult(); done = true; };
   rec.onerror = e => { if(e && (e.error === "not-allowed" || e.error === "service-not-allowed")) dictateMode(); };
   rec.onend = () => { rec = null; mic.classList.remove("rec"); $("#say").placeholder = UI[lang].placeholder; };
   try{ rec.start(); }catch(_){ rec = null; mic.classList.remove("rec"); dictateMode(); }
 };
 // 받아쓰기로 글자가 들어오면 잠시 뒤 자동 통역
 $("#say").addEventListener("input", () => {
+  done = false;
   if(!dictating) return;
   clearTimeout(autoTimer);
-  autoTimer = setTimeout(() => { const v = $("#say").value.trim(); if(v){ last = v; renderResult(); } }, 1200);
+  autoTimer = setTimeout(() => { const v = $("#say").value.trim(); if(v){ last = v; renderResult(); done = true; } }, 1200);
 });
 render();
 </script>
