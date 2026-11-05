@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ちいかわ語 통역기 (비공식)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 원작 캐릭터 인상에서 가져온 색: 하얀 몸, 볼터치 핑크, 우사기 크림 옐로, 쿠리만쥬 밤색, 하치와레 하늘색, 연필선 같은 갈색 */
+  --bg:#fdf1f3; --paper:#ffffff; --ink:#4a3b3a; --soft:#8a7774;
+  --cheek:#f6a9b9; --butter:#f8e49a; --chestnut:#b9875e; --sky:#b8d6ef; --kani:#f49ca6;
+  --line:#4a3b3a; --sub-bg:#4a3b3a; --sub-fg:#ffffff; --chip:#fff6df;
+  --accent:var(--cheek);
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2c2326; --paper:#3a2f32; --ink:#fbeef0; --soft:#c9b4b6; --line:#fbeef0;
+    --sub-bg:#fbeef0; --sub-fg:#4a3b3a; --chip:#4a3d40; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2c2326; --paper:#3a2f32; --ink:#fbeef0; --soft:#c9b4b6; --line:#fbeef0;
+  --sub-bg:#fbeef0; --sub-fg:#4a3b3a; --chip:#4a3d40; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Zen Maru Gothic","Gowun Dodum","Hiragino Maru Gothic ProN","Apple SD Gothic Neo",sans-serif;
+  line-height:1.6;
+}
+main{max-width:560px; margin:0 auto; padding:28px 18px 40px}
+header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
+h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-size:clamp(1.7rem,6vw,2.2rem); line-height:1.25; margin:0}
+.tag{margin:8px 0 0; color:var(--soft); font-size:.95rem}
+.lang{display:flex; border:2px solid var(--line); border-radius:999px; overflow:hidden; flex-shrink:0}
+.lang button{border:0; background:transparent; color:var(--ink); font:inherit; font-weight:700; padding:4px 12px; cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink); color:var(--bg)}
+
+.who{display:flex; gap:8px; margin:26px 0 14px; flex-wrap:wrap}
+.who button{font:inherit; font-weight:700; color:var(--ink); background:var(--paper); border:2px solid var(--line); border-radius:999px; padding:7px 14px 7px 10px; display:flex; align-items:center; gap:8px; cursor:pointer}
+.who .bub{display:block; transform-origin:20% 100%}
+.bub.bop{animation:bop .4s ease-out}
+@keyframes bop{30%{transform:scale(1.18) rotate(-6deg)}60%{transform:scale(.95)}}
+.who button[aria-pressed="true"]{background:var(--accent); color:#4a3b3a; transform:translateY(-2px); box-shadow:0 3px 0 var(--line)}
+
+.bubble{position:relative; background:var(--paper); border:3px solid var(--line); border-radius:28px; padding:18px 18px 16px; margin-top:6px}
+.bubble::after{content:""; position:absolute; left:42px; bottom:-17px; width:26px; height:26px; background:var(--paper); border-right:3px solid var(--line); border-bottom:3px solid var(--line); transform:skewX(-25deg) rotate(45deg)}
+.input-row{display:flex; gap:8px; align-items:center}
+#say{flex:1; min-width:0; font-family:"Mochiy Pop One","Zen Maru Gothic",sans-serif; font-size:clamp(1.4rem,6vw,1.9rem); color:var(--ink); background:transparent; border:0; border-bottom:2px dashed var(--soft); padding:4px 2px; outline:none}
+#say:focus-visible{border-bottom-color:var(--ink)}
+#say::placeholder{color:var(--soft); opacity:.6}
+.icon-btn{width:46px; height:46px; border-radius:50%; border:2px solid var(--line); background:var(--chip); color:var(--ink); font-size:1.2rem; cursor:pointer; flex-shrink:0}
+.icon-btn.rec{background:var(--cheek); animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+.chips button{font-family:"Mochiy Pop One",sans-serif; font-size:1rem; color:var(--ink); background:var(--chip); border:2px solid var(--line); border-radius:12px; padding:4px 12px; cursor:pointer}
+.chips button:active{transform:scale(.94)}
+.chips small,.gloss small{font-family:"Zen Maru Gothic",sans-serif; font-size:.72em; opacity:.6; margin-left:4px}
+.hint{font-size:.82rem; color:var(--soft); margin:10px 0 0}
+
+.go{display:block; width:100%; margin:34px 0 0; padding:14px; font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-size:1.15rem; color:#4a3b3a; background:var(--accent); border:3px solid var(--line); border-radius:18px; box-shadow:0 5px 0 var(--line); cursor:pointer}
+.go:active{transform:translateY(4px); box-shadow:0 1px 0 var(--line)}
+.go:disabled{opacity:.5; cursor:default}
+
+.result{margin-top:30px; min-height:120px}
+.empty{color:var(--soft); text-align:center; font-size:.95rem; padding:10px 0; display:flex; flex-direction:column; align-items:center}
+.empty p{margin:4px 0 0}
+.interp{display:flex; align-items:flex-end; gap:6px; margin-bottom:2px}
+.interp span{font-size:.8rem; font-weight:700; color:var(--soft); padding-bottom:10px}
+.bird{flex-shrink:0; transform-origin:50% 100%; animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:rotate(-5deg)}}
+.sub{background:var(--sub-bg); color:var(--sub-fg); border-radius:6px; padding:16px 18px; font-size:1.15rem; font-weight:700; line-height:1.55; animation:in .35s ease-out}
+.sub small{display:block; font-weight:500; font-size:.8rem; opacity:.7; margin-bottom:4px}
+@keyframes in{from{opacity:0; transform:translateY(8px)}}
+.meta{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; font-size:.85rem; color:var(--soft)}
+.meter{flex:1; height:8px; border:2px solid var(--line); border-radius:999px; overflow:hidden; max-width:160px}
+.meter i{display:block; height:100%; background:var(--accent)}
+.again{font:inherit; font-size:.85rem; font-weight:700; background:none; border:0; color:var(--ink); text-decoration:underline; cursor:pointer}
+.gloss{margin:18px 0 0; padding:0; list-style:none; font-size:.88rem}
+.gloss li{padding:8px 0; border-top:1px dashed var(--soft)}
+.gloss b{font-family:"Mochiy Pop One",sans-serif; font-weight:400; margin-right:6px}
+
+footer{margin-top:44px; font-size:.78rem; color:var(--soft); line-height:1.7}
+button:focus-visible,input:focus-visible{outline:3px solid var(--chestnut); outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 id="t-title">ちいかわ語<br>통역기</h1>
+      <p class="tag" id="t-tag"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="ko" aria-pressed="true">한</button>
+      <button data-lang="ja" aria-pressed="false">日</button>
+    </div>
+  </header>
+
+  <div class="who" id="who" role="group"></div>
+
+  <div class="bubble">
+    <div class="input-row">
+      <input id="say" autocomplete="off" aria-label="sound">
+      <button class="icon-btn" id="mic" type="button" aria-label="mic" hidden>🎤</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <p class="hint" id="t-hint"></p>
+  </div>
+
+  <button class="go" id="go" type="button"></button>
+
+  <section class="result" id="result" aria-live="polite"></section>
+
+  <footer id="t-foot"></footer>
+</main>
+
+<script>
+const UI = {
+  ko:{
+    title:"ちいかわ語<br>통역기",
+    tag:"울음소리를 들려주면, 무슨 말인지 알려줄게요.",
+    hint:"소리 버튼을 누르거나, 직접 입력하거나, 🎤를 누르고 흉내 내 보세요. 한국어로 써도 돼요.",
+    hintNoMic:"소리 버튼을 누르거나, 직접 입력해 보세요.",
+    placeholder:"예: 야하",
+    dictate:"입력창을 누르고 키보드의 🎤로 말해 보세요. PC는 Win+H(Windows) 또는 Control 두 번(Mac).",
+    go:"인간 언어로 통역",
+    empty:"아직 아무 소리도 안 들렸어요.",
+    conf:"통역 자신감",
+    again:"다르게 통역",
+    interp:"통역사",
+    glossTitle:"이 소리, 원작에서는",
+    unknown:["…처음 듣는 소리예요. 한 번만 더 해 주세요.","통역사도 고개를 갸웃했어요.","이 소리는 아직 사전에 없어요."],
+    listening:"듣고 있어요…",
+    foot:"팬이 재미로 만든 비공식 통역기예요. 원작자·공식과는 관계없어요. 소리별 뜻은 팬들 사이의 해석을 참고했고, 통역 문장은 지어낸 거예요. 원작: ナガノ『ちいかわ なんか小さくてかわいいやつ』"
+  },
+  ja:{
+    title:"ちいかわ語<br>通訳機",
+    tag:"鳴き声を聞かせてくれたら、なんて言ってるか教えるよ。",
+    hint:"音のボタンを押すか、入力するか、🎤を押してマネしてみて。",
+    hintNoMic:"音のボタンを押すか、入力してみて。",
+    placeholder:"例:ヤハ",
+    dictate:"入力欄をタップして、キーボードの🎤で話してみて。PCはWin+H(Windows)かControl 2回(Mac)。",
+    go:"人間の言葉に通訳",
+    empty:"まだ何も聞こえてないよ。",
+    conf:"通訳の自信",
+    again:"別の通訳",
+    interp:"通訳さん",
+    glossTitle:"この音、原作では",
+    unknown:["…はじめて聞く音です。もう一回お願い。","通訳さんも首をかしげています。","この音はまだ辞書にありません。"],
+    listening:"聞いてるよ…",
+    foot:"ファンが遊びで作った非公式の通訳機です。原作者・公式とは関係ありません。音の意味はファンの間の解釈を参考にしていて、通訳の文章は創作です。原作:ナガノ『ちいかわ なんか小さくてかわいいやつ』"
+  }
+};
+
+// gloss = 원작/애니에서 쓰이는 상황(팬 해석 기반), lines = 통역 문장(창작)
+const CHARS = {
+  chiikawa:{ name:{ko:"치이카와",ja:"ちいかわ"}, color:"#ffffff", accent:"#f6a9b9",
+    sounds:{
+      "ワァ":{ gloss:{ko:"놀랐을 때, 감탄할 때. 슬플 때도 써요(ワァ… 泣いちゃった).", ja:"驚いたとき、感動したとき。悲しいときにも(ワァ…泣いちゃった)。"},
+        lines:[
+          {ko:"우와… 이거 진짜 나 줘도 돼…?", ja:"わあ…これ、ほんとにもらっていいの…?"},
+          {ko:"너무 예뻐서 말이 안 나와…", ja:"きれいすぎて言葉が出ない…"},
+          {ko:"어떡해… 눈물 날 것 같아…", ja:"どうしよう…泣いちゃいそう…"}]},
+      "フ":{ gloss:{ko:"기분 좋을 때 나오는 짧은 한마디.", ja:"うれしいときに出る短いひと声。"},
+        lines:[
+          {ko:"헤헤, 좋다!", ja:"えへへ、いいね!"},
+          {ko:"해냈다…!", ja:"できた…!"},
+          {ko:"오늘 꽤 괜찮은 하루였어.", ja:"今日、けっこういい日だったな。"}]},
+      "イヤ":{ gloss:{ko:"싫은 일, 무서운 상대 앞에서. イヤッ イヤ イヤ!!!처럼 점점 세져요.", ja:"いやなこと、こわい相手の前で。イヤッ イヤ イヤ!!!とだんだん強くなる。"},
+        lines:[
+          {ko:"싫어! 오지 마!!", ja:"やだ!来ないで!!"},
+          {ko:"그건 진짜 무섭단 말이야…", ja:"それ、ほんとにこわいんだって…"},
+          {ko:"오늘은 안 갈래…!", ja:"今日は行かない…!"}]},
+      "ヤダ":{ gloss:{ko:"イヤッ와 같이 쓰이는 거절·항의.", ja:"イヤッと並ぶ拒否・抗議。"},
+        lines:[
+          {ko:"절대 안 돼!!", ja:"ぜったいダメ!!"},
+          {ko:"그거 내 거야, 돌려줘!", ja:"それ、ぼくの!返して!"}]},
+      "アッアッ":{ gloss:{ko:"당황하거나 불안할 때.", ja:"あせったり、不安なとき。"},
+        lines:[
+          {ko:"어, 어… 잠깐만, 이거 어떡하지…", ja:"あ、あ…ちょっと待って、どうしよう…"},
+          {ko:"떨어뜨렸어… 떨어뜨렸어…!", ja:"落としちゃった…落としちゃった…!"}]}
+    }},
+  usagi:{ name:{ko:"우사기",ja:"うさぎ"}, color:"#f8e49a", accent:"#f8e49a",
+    sounds:{
+      "ヤハ":{ gloss:{ko:"인사, 기쁨, 긍정적인 대답, 맞장구. 뭔가 찾았을 때나 달려갈 때도.", ja:"あいさつ、よろこび、前向きな返事、あいづち。何か見つけたときや走りだすときにも。"},
+        lines:[
+          {ko:"안녕~ 나 왔어!", ja:"よっ、来たぞ!"},
+          {ko:"좋아! 그거 하자!", ja:"いいね!それやろ!"},
+          {ko:"찾았다! 가자!!", ja:"見つけた!行くぞ!!"}]},
+      "ウラ":{ gloss:{ko:"기합 소리(던지거나 짤 때). 대충 하는 대답이라는 해석도 있어요.", ja:"かけ声(投げる・しぼるとき)。適当な生返事という解釈も。"},
+        lines:[
+          {ko:"에잇!", ja:"えいっ!"},
+          {ko:"어~ 그래그래.", ja:"おー、そうそう。"},
+          {ko:"맡겨 둬.", ja:"まかせとけ。"}]},
+      "ハァ":{ gloss:{ko:"되묻기, 반발, 놀람. 쑥스러움을 감출 때도.", ja:"聞き返し、反発、おどろき。照れかくしにも。"},
+        lines:[
+          {ko:"뭐? 다시 말해 봐.", ja:"は?もう一回言って。"},
+          {ko:"왜 울어? 겁먹었어?", ja:"なんで泣いてんの?ビビってる?"},
+          {ko:"(찍지 마… 쑥스럽잖아)", ja:"(撮るなよ…照れるだろ)"}]},
+      "フゥン":{ gloss:{ko:"맞장구(\"어디 보자\"). 길게 끌면 으쓱한 얼굴.", ja:"あいづち(「どれどれ」)。のばすとドヤ顔。"},
+        lines:[
+          {ko:"어디 한번 볼까.", ja:"どれどれ。"},
+          {ko:"음, 나쁘지 않네.", ja:"うん、悪くないね。"},
+          {ko:"나 이 정도는 하지.", ja:"これくらい、できるし。"}]},
+      "プルャ":{ gloss:{ko:"긍정·공감의 대답(\"그렇지\").", ja:"肯定・共感の返事(「そうだよ」)。"},
+        lines:[
+          {ko:"그렇지!", ja:"そうだよ!"},
+          {ko:"응, 맛있는 거 맞아.", ja:"うん、おいしいやつ。"},
+          {ko:"알지 알지.", ja:"わかるわかる。"}]},
+      "プルル":{ gloss:{ko:"신나고 기쁠 때.", ja:"楽しい・うれしいとき。"},
+        lines:[
+          {ko:"신난다~!!", ja:"わーい!!"},
+          {ko:"아싸!", ja:"やったー!"}]}
+    }},
+  kurimanju:{ name:{ko:"쿠리만쥬",ja:"くりまんじゅう"}, color:"#b9875e", accent:"#e2b48a",
+    sounds:{
+      "ハァーッ":{ gloss:{ko:"술을 들이켜거나 안주를 먹고 나서 내쉬는 숨.", ja:"お酒をぐびっと飲んだあと、つまみを食べたあとに吐く息。"},
+        lines:[
+          {ko:"크~ 이 맛이지.", ja:"くぅ~、これこれ。"},
+          {ko:"오늘도 수고했다.", ja:"今日もおつかれ。"},
+          {ko:"안주가 너무 맛있어서 할 말이 없다.", ja:"つまみがうますぎて言葉が出ない。"},
+          {ko:"…좋다.", ja:"…いいな。"}]}
+    }},
+  kani:{ name:{ko:"카니짱(고서점)",ja:"古本屋(カニちゃん)"}, color:"#f49ca6", accent:"#f49ca6",
+    sounds:{
+      "ワァ":{ gloss:{ko:"애니에서 책값을 못 받고 당황할 때 낸 소리.", ja:"アニメで本の代金をもらえず、あせったときの声。"},
+        lines:[
+          {ko:"저기… 아직 돈 안 내셨는데요…", ja:"あの…まだお代、もらってないです…"},
+          {ko:"어… 그거 들고 가시면 안 돼요…", ja:"え…それ持っていかないで…"}]},
+      "クスッ":{ gloss:{ko:"조용히 웃을 때.", ja:"ひかえめに笑うとき。"},
+        lines:[
+          {ko:"(속으로 웃는 중)", ja:"(心の中で笑ってる)"},
+          {ko:"모몬가, 또 그러네.", ja:"モモンガ、またやってる。"}]}
+    }}
+};
+
+// 한국어 표기: label = 화면에 보이는 표기, alt = 한국어 입력·음성으로 들어올 수 있는 변형
+const KR = {
+  chiikawa:{ "ワァ":{label:"와아",alt:["와아","와"]}, "フ":{label:"후",alt:["후"]}, "イヤ":{label:"이야",alt:["이야","싫어"]},
+             "ヤダ":{label:"야다",alt:["야다","싫다"]}, "アッアッ":{label:"앗앗",alt:["앗앗","아앗"]} },
+  usagi:{ "ヤハ":{label:"야하",alt:["야하"]}, "ウラ":{label:"우라",alt:["우라","울라"]}, "ハァ":{label:"하?",alt:["하아","하"]},
+          "フゥン":{label:"후응",alt:["후응","후웅","흐응","흥"]}, "プルャ":{label:"푸르야",alt:["푸르야","뿌르야","푸랴"]},
+          "プルル":{label:"푸르르",alt:["푸르르","뿌르르"]} },
+  kurimanju:{ "ハァーッ":{label:"하아앗",alt:["하아앗","하앗","하아","캬","크아"]} },
+  kani:{ "ワァ":{label:"와아",alt:["와아","와"]}, "クスッ":{label:"큭",alt:["큭","쿡","풉"]} }
+};
+const label = (w,k) => lang === "ko" ? KR[w][k].label : k;
+
+let lang = "ko", who = "usagi", last = null;
+const $ = s => document.querySelector(s);
+
+function norm(s){
+  return s.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0)+0x60))
+    .replace(/[〜~～\-–—]/g,"ー")
+    .replace(/[ァィゥェォ]/g,"ー")
+    .replace(/[\s、。!?！？…・.,"'“”「」~]/g,"")
+    .replace(/ッ+/g,"ッ");
+}
+function key(s){ return s.replace(/[ーッャ]+$/,""); }
+
+function translate(raw){
+  const c = CHARS[who];
+  let text = norm(raw);
+  const keys = [];
+  for(const k of Object.keys(c.sounds)){
+    keys.push({k, n:key(norm(k))});
+    for(const a of KR[who][k].alt) keys.push({k, n:norm(a)});
+  }
+  keys.sort((a,b) => b.n.length - a.n.length);
+  const hits = [];
+  while(text.length){
+    const m = keys.find(o => o.n && text.startsWith(o.n));
+    if(m){ hits.push(m.k); text = text.slice(m.n.length).replace(/^[ーッャ]+/,""); }
+    else text = text.slice(1);
+  }
+  if(!hits.length){
+    const u = UI[lang].unknown;
+    return {text:u[Math.floor(Math.random()*u.length)], conf: 3 + Math.floor(Math.random()*15), hits};
+  }
+  const out = []; let i = 0;
+  while(i < hits.length){
+    let j = i; while(j < hits.length && hits[j] === hits[i]) j++;
+    const pool = c.sounds[hits[i]].lines;
+    let line = pool[Math.floor(Math.random()*pool.length)][lang];
+    if(j - i >= 2) line += lang === "ko" ? " (×" + (j-i) + ")" : "(×" + (j-i) + ")";
+    out.push(line); i = j;
+  }
+  return {text: out.slice(0,3).join(" "), conf: 62 + Math.floor(Math.random()*37), hits:[...new Set(hits)]};
+}
+
+// 오리지널 마스코트: 헤드폰을 쓴 통역사 새 (원작과 무관한 창작)
+const BIRD = `<svg class="bird" viewBox="0 0 80 80" width="64" height="64" aria-hidden="true"><g stroke="#4a3b3a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="M36 22c-1-7 4-11 8-10-3 2-3 5-1 8" fill="#a8dcc8"/><ellipse cx="40" cy="46" rx="24" ry="22" fill="#a8dcc8"/><ellipse cx="40" cy="55" rx="13" ry="10" fill="#e6f5ee" stroke="none"/><path d="M17 48c-5 4-4 11 1 13 3-3 4-7 3-12" fill="#86c6ad"/><path d="M63 48c5 4 4 11-1 13-3-3-4-7-3-12" fill="#86c6ad"/><circle cx="32" cy="42" r="2.6" fill="#4a3b3a" stroke="none"/><circle cx="48" cy="42" r="2.6" fill="#4a3b3a" stroke="none"/><path d="M36 47h8l-4 5z" fill="#f4a65b"/><path d="M34 68v6M46 68v6"/><path d="M16 42a24 24 0 0 1 48 0" fill="none" stroke-width="4"/><rect x="11" y="38" width="9" height="14" rx="4" fill="#b9875e"/><rect x="60" y="38" width="9" height="14" rx="4" fill="#b9875e"/></g></svg>`;
+
+function renderResult(){
+  const r = $("#result"), t = UI[lang];
+  if(!last){ r.innerHTML = `<div class="empty">${BIRD}<p>${t.empty}</p></div>`; return; }
+  const res = translate(last);
+  const c = CHARS[who];
+  r.innerHTML = `<div class="interp">${BIRD}<span>${t.interp}</span></div><div class="sub"><small></small><span></span></div>
+    <div class="meta"><span>${t.conf}</span><span class="meter"><i style="width:${res.conf}%"></i></span><span>${res.conf}%</span>
+    <button class="again" type="button" id="again">${t.again}</button></div>`;
+  r.querySelector(".sub small").textContent = `${c.name[lang]}「${last}」`;
+  r.querySelector(".sub span").textContent = res.text;
+  if(res.hits.length){
+    const ul = document.createElement("ul"); ul.className = "gloss";
+    ul.setAttribute("aria-label", t.glossTitle);
+    for(const h of res.hits){
+      const li = document.createElement("li");
+      const b = document.createElement("b"); b.textContent = label(who, h);
+      if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = h; b.appendChild(sm); }
+      li.append(b, c.sounds[h].gloss[lang]); ul.appendChild(li);
+    }
+    r.appendChild(ul);
+  }
+  $("#again").onclick = renderResult;
+}
+
+function renderWho(){
+  const box = $("#who"); box.innerHTML = "";
+  for(const [id,c] of Object.entries(CHARS)){
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-pressed", id === who);
+    const sig = (lang === "ko" ? KR[id][Object.keys(c.sounds)[0]].label : Object.keys(c.sounds)[0]);
+    b.innerHTML = `<svg class="bub" viewBox="0 0 64 40" width="52" height="33" aria-hidden="true"><path d="M8 3h48a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H22l-9 7 2-7H8a6 6 0 0 1-6-6V9a6 6 0 0 1 6-6z" fill="${c.color}" stroke="#4a3b3a" stroke-width="2.5" stroke-linejoin="round"/><text x="32" y="22" text-anchor="middle" font-family="Mochiy Pop One, sans-serif" font-size="${sig.length > 3 ? 11 : 13}" fill="#4a3b3a">${sig}</text></svg>`;
+    b.append(c.name[lang]);
+    b.onclick = () => { who = id; $("#say").value = ""; last = null; render(); };
+    box.appendChild(b);
+  }
+  document.documentElement.style.setProperty("--accent", CHARS[who].accent);
+}
+function renderChips(){
+  const box = $("#chips"); box.innerHTML = "";
+  for(const s of Object.keys(CHARS[who].sounds)){
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label(who, s);
+    if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = s; b.appendChild(sm); }
+    b.onclick = () => { const i = $("#say"); i.value = (i.value ? i.value + " " : "") + label(who, s); updateGo(); bop(); };
+    box.appendChild(b);
+  }
+}
+function updateGo(){ $("#go").disabled = !$("#say").value.trim(); }
+function bop(){
+  const svg = document.querySelector('.who button[aria-pressed="true"] .bub');
+  if(!svg) return;
+  svg.classList.remove("bop"); void svg.getBoundingClientRect(); svg.classList.add("bop");
+}
+function render(){
+  const t = UI[lang];
+  document.documentElement.lang = lang;
+  document.title = lang === "ko" ? "ちいかわ語 통역기 (비공식)" : "ちいかわ語 通訳機(非公式)";
+  $("#t-title").innerHTML = t.title; $("#t-tag").textContent = t.tag;
+  $("#t-hint").textContent = dictating ? t.dictate : t.hint;
+  $("#say").placeholder = t.placeholder; $("#go").textContent = t.go;
+  $("#t-foot").textContent = t.foot;
+  document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+  renderWho(); renderChips(); updateGo(); renderResult();
+}
+
+document.querySelectorAll(".lang button").forEach(b => b.onclick = () => { lang = b.dataset.lang; render(); });
+$("#say").addEventListener("input", () => { updateGo(); bop(); });
+$("#say").addEventListener("keydown", e => { if(e.key === "Enter" && $("#say").value.trim()) $("#go").click(); });
+$("#go").onclick = () => { last = $("#say").value.trim(); renderResult(); };
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+// claude.ai 안에서는 프레임에 마이크 권한이 없어 차단됨 → 키보드/OS 받아쓰기로 안내
+const micAllowed = (() => {
+  try{
+    const fp = document.permissionsPolicy || document.featurePolicy;
+    if(fp && typeof fp.allowedFeatures === "function") return fp.allowedFeatures().includes("microphone");
+  }catch(_){}
+  return true;
+})();
+let useSR = !!SR && micAllowed, dictating = false, autoTimer = null;
+
+function dictateMode(){
+  useSR = false; dictating = true;
+  $("#t-hint").textContent = UI[lang].dictate;
+  $("#say").focus();
+}
+const mic = $("#mic"); mic.hidden = false;
+let rec = null;
+mic.onclick = () => {
+  if(!useSR){ dictateMode(); return; }
+  if(rec){ rec.stop(); return; }
+  rec = new SR(); rec.lang = lang === "ko" ? "ko-KR" : "ja-JP"; rec.interimResults = false; rec.maxAlternatives = 1;
+  mic.classList.add("rec"); $("#say").placeholder = UI[lang].listening;
+  rec.onresult = e => { const heard = e.results[0][0].transcript; $("#say").value = heard; updateGo(); bop(); last = heard; renderResult(); };
+  rec.onerror = e => { if(e && (e.error === "not-allowed" || e.error === "service-not-allowed")) dictateMode(); };
+  rec.onend = () => { rec = null; mic.classList.remove("rec"); $("#say").placeholder = UI[lang].placeholder; };
+  try{ rec.start(); }catch(_){ rec = null; mic.classList.remove("rec"); dictateMode(); }
+};
+// 받아쓰기로 글자가 들어오면 잠시 뒤 자동 통역
+$("#say").addEventListener("input", () => {
+  if(!dictating) return;
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() => { const v = $("#say").value.trim(); if(v){ last = v; renderResult(); } }, 1200);
+});
+render();
+</script>
+</body>
+</html>
