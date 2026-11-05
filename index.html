@@ -126,6 +126,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--chestnut); outl
   .who button{font-size:.85rem; padding:6px 8px 6px 6px; gap:4px}
   .who .bub{width:36px; height:23px}
 }
+.result{scroll-margin-top:12px}
+.gloss-card{margin-top:10px; background:var(--paper); background:color-mix(in srgb, var(--accent) 24%, var(--paper)); border:2px solid var(--line); border-radius:14px; padding:12px 14px; animation:in .35s ease-out}
+.gloss-card .gloss-h{margin:0 0 4px; font-size:.82rem; font-weight:700; color:var(--ink)}
+.gloss-card .gloss{margin:0; font-size:.95rem}
+.gloss-card .gloss li{padding:8px 0 4px; border-top:1px dashed var(--soft); word-break:keep-all; overflow-wrap:anywhere}
+.gloss-card .gloss li:first-child{border-top:0; padding-top:2px}
+.gloss-card .gloss b{display:block; font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-size:1.05rem; line-height:1.4}
+.gloss-card .gloss .desc{display:block; line-height:1.6}
+.gloss-card .gloss li.note{font-size:.82rem; color:var(--soft); padding-bottom:6px}
 </style>
 </head>
 <body>
@@ -179,7 +188,7 @@ const UI = {
     thanks:"제안 고마워요! 통역사가 공부해 둘게요.",
     sent:"보냈어요",
     failed:"전송에 실패했어요. 잠시 후 다시 보내 주세요.",
-    glossTitle:"이 소리, 원작에서는",
+    glossTitle:"💬 이 소리는요",
     fuzzyNote:"딱 맞는 소리는 없어서, 가장 비슷한 소리로 통역했어요.",
     moodNote:"사전에 없는 소리라, 소리의 분위기로 통역했어요.",
     moods:{excited:"신남",question:"궁금함",hesitant:"머뭇거림",calm:"평온"},
@@ -204,7 +213,7 @@ const UI = {
     thanks:"提案ありがとう!通訳さんが勉強しておくね。",
     sent:"送りました",
     failed:"送信できませんでした。少したってからもう一度送ってね。",
-    glossTitle:"この音、原作では",
+    glossTitle:"💬 この音は",
     fuzzyNote:"ぴったりの音がないので、いちばん近い音で通訳しました。",
     moodNote:"辞書にない音なので、音の雰囲気で通訳しました。",
     moods:{excited:"興奮",question:"疑問",hesitant:"ためらい",calm:"おだやか"},
@@ -410,6 +419,7 @@ function renderResult(){
   const res = translate(last);
   const c = CHARS[who];
   r.innerHTML = `<div class="interp">${BIRD}<span>${t.interp}</span></div><div class="sub"><small></small><span></span></div>
+    <div class="gloss-card"><p class="gloss-h"></p></div>
     <div class="meta"><span>${t.conf}</span><span class="meter"><i style="width:${res.conf}%"></i></span><span>${res.conf}%</span>
     <button class="again" type="button" id="again">${t.again}</button><button class="again" type="button" id="suggest">${t.suggest}</button></div>`;
   r.querySelector(".sub small").textContent = `${c.name[lang]}「${last}」`;
@@ -418,6 +428,7 @@ function renderResult(){
   ul.setAttribute("aria-label", t.glossTitle);
   if(res.mode !== "exact"){
     const li = document.createElement("li");
+    li.className = "note";
     li.textContent = res.mode === "fuzzy" ? t.fuzzyNote : t.moodNote + " (" + t.moods[res.mood] + ")";
     ul.appendChild(li);
   }
@@ -425,10 +436,14 @@ function renderResult(){
     const li = document.createElement("li");
     const b = document.createElement("b"); b.textContent = label(who, h);
     if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = h; b.appendChild(sm); }
-    li.append(b, c.sounds[h].gloss[lang]); ul.appendChild(li);
+    const d = document.createElement("span"); d.className = "desc"; d.textContent = c.sounds[h].gloss[lang];
+    li.append(b, d); ul.appendChild(li);
   }
-  r.appendChild(ul);
-  $("#again").onclick = renderResult;
+  // 소리 설명: 통역 문장 바로 아래 카드에
+  const card = r.querySelector(".gloss-card");
+  card.querySelector(".gloss-h").textContent = t.glossTitle;
+  card.appendChild(ul);
+  $("#again").onclick = () => { renderResult(); scrollToResult(); };
   setupSuggest(c.name[lang], last, res.text);
 }
 
@@ -512,7 +527,17 @@ function render(){
 document.querySelectorAll(".lang button").forEach(b => b.onclick = () => { lang = b.dataset.lang; render(); });
 $("#say").addEventListener("input", () => { updateGo(); bop(); });
 $("#say").addEventListener("keydown", e => { if(e.key === "Enter" && $("#say").value.trim()) $("#go").click(); });
-$("#go").onclick = () => { last = $("#say").value.trim(); renderResult(); };
+// 통역 결과로 스크롤: 결과가 이미 화면에 다 보이면 움직이지 않음. 「동작 줄이기」 설정이면 애니메이션 없이 이동.
+function scrollToResult(){
+  const r = $("#result"); if(!r || !r.firstElementChild) return;
+  requestAnimationFrame(() => {
+    const box = r.getBoundingClientRect();
+    if(box.top >= 0 && box.bottom <= window.innerHeight) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    r.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"});
+  });
+}
+$("#go").onclick = () => { last = $("#say").value.trim(); renderResult(); scrollToResult(); };
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 // claude.ai 안에서는 프레임에 마이크 권한이 없어 차단됨 → 키보드/OS 받아쓰기로 안내
