@@ -84,6 +84,17 @@ h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-
 .meter{flex:1; height:8px; border:2px solid var(--line); border-radius:999px; overflow:hidden; max-width:160px}
 .meter i{display:block; height:100%; background:var(--accent)}
 .again{font:inherit; font-size:.85rem; font-weight:700; background:none; border:0; color:var(--ink); text-decoration:underline; cursor:pointer}
+.again:disabled{opacity:.6; cursor:default; text-decoration:none}
+.panel{margin-top:12px; background:var(--paper); border:2px solid var(--line); border-radius:16px; padding:12px 14px}
+.panel .was{margin:0 0 8px; font-size:.85rem; color:var(--soft)}
+.panel textarea{width:100%; font:inherit; color:var(--ink); background:var(--bg); border:2px dashed var(--soft); border-radius:10px; padding:8px; resize:vertical}
+.panel-row{display:flex; align-items:center; gap:8px; margin-top:8px}
+.panel-row .count{flex:1; font-size:.75rem; color:var(--soft)}
+.panel-row button{font:inherit; font-weight:700; border:2px solid var(--line); border-radius:10px; padding:4px 12px; cursor:pointer; background:var(--paper); color:var(--ink)}
+.panel-row .send{background:var(--accent); color:#4a3b3a}
+.panel-row .send:disabled{opacity:.5; cursor:default}
+.panel .thanks{margin:0; font-weight:700}
+.panel .fail{margin:6px 0 0; font-size:.82rem; color:var(--chestnut)}
 .gloss{margin:18px 0 0; padding:0; list-style:none; font-size:.88rem}
 .gloss li{padding:8px 0; border-top:1px dashed var(--soft)}
 .gloss b{font-family:"Mochiy Pop One",sans-serif; font-weight:400; margin-right:6px}
@@ -138,8 +149,16 @@ const UI = {
     conf:"통역 자신감",
     again:"다르게 통역",
     interp:"통역사",
+    suggest:"통역 제안하기",
+    suggestPh:"내 생각엔 이런 뜻이에요",
+    send:"보내기", cancel:"취소",
+    thanks:"제안 고마워요! 통역사가 공부해 둘게요.",
+    sent:"보냈어요",
+    failed:"전송에 실패했어요. 잠시 후 다시 보내 주세요.",
     glossTitle:"이 소리, 원작에서는",
-    unknown:["…처음 듣는 소리예요. 한 번만 더 해 주세요.","통역사도 고개를 갸웃했어요.","이 소리는 아직 사전에 없어요."],
+    fuzzyNote:"딱 맞는 소리는 없어서, 가장 비슷한 소리로 통역했어요.",
+    moodNote:"사전에 없는 소리라, 소리의 분위기로 통역했어요.",
+    moods:{excited:"신남",question:"궁금함",hesitant:"머뭇거림",calm:"평온"},
     listening:"듣고 있어요…",
     foot:"팬이 재미로 만든 비공식 통역기예요. 원작자·공식과는 관계없어요. 소리별 뜻은 팬들 사이의 해석을 참고했고, 통역 문장은 지어낸 거예요. 원작: ナガノ『ちいかわ なんか小さくてかわいいやつ』"
   },
@@ -155,8 +174,16 @@ const UI = {
     conf:"通訳の自信",
     again:"別の通訳",
     interp:"通訳さん",
+    suggest:"通訳を提案する",
+    suggestPh:"わたしはこういう意味だと思う",
+    send:"送る", cancel:"やめる",
+    thanks:"提案ありがとう!通訳さんが勉強しておくね。",
+    sent:"送りました",
+    failed:"送信できませんでした。少したってからもう一度送ってね。",
     glossTitle:"この音、原作では",
-    unknown:["…はじめて聞く音です。もう一回お願い。","通訳さんも首をかしげています。","この音はまだ辞書にありません。"],
+    fuzzyNote:"ぴったりの音がないので、いちばん近い音で通訳しました。",
+    moodNote:"辞書にない音なので、音の雰囲気で通訳しました。",
+    moods:{excited:"興奮",question:"疑問",hesitant:"ためらい",calm:"おだやか"},
     listening:"聞いてるよ…",
     foot:"ファンが遊びで作った非公式の通訳機です。原作者・公式とは関係ありません。音の意味はファンの間の解釈を参考にしていて、通訳の文章は創作です。原作:ナガノ『ちいかわ なんか小さくてかわいいやつ』"
   }
@@ -256,6 +283,39 @@ const KR = {
 };
 const label = (w,k) => lang === "ko" ? KR[w][k].label : k;
 
+// 사전에 없는 소리일 때: 소리의 분위기(길이·반복·?·!·…)로 고르는 캐릭터별 문장 (창작)
+const MOOD = {
+  chiikawa:{
+    excited:[{ko:"와아…!! 이런 거 처음이야!!",ja:"わぁ…!!こんなのはじめて!!"},{ko:"엄청 신나… 근데 조금 무서워…!",ja:"すごく楽しい…でもちょっとこわい…!"}],
+    question:[{ko:"이거… 먹어도 되는 거야…?",ja:"これ…食べてもいいの…?"},{ko:"나도… 같이 가도 돼…?",ja:"ぼくも…一緒に行っていい…?"}],
+    hesitant:[{ko:"어… 음… 아무것도 아니야…",ja:"あ…えっと…なんでもない…"},{ko:"(말하려다 삼킴)",ja:"(言いかけて、のみこんだ)"}],
+    calm:[{ko:"오늘도 하루 잘 버텼다…",ja:"今日もなんとかがんばった…"},{ko:"같이 있으니까 좋다.",ja:"一緒にいると、いいな。"}]},
+  usagi:{
+    excited:[{ko:"다 비켜!! 내가 간다!!!",ja:"どけどけ!!行くぞ!!!"},{ko:"지금 기분 최고야!!!",ja:"今、気分サイコー!!!"}],
+    question:[{ko:"그래서? 어쩔 건데?",ja:"で?どうすんの?"},{ko:"그거 맛있어?",ja:"それ、うまいの?"}],
+    hesitant:[{ko:"…흥.",ja:"…ふん。"},{ko:"(뭔가 꾸미는 중)",ja:"(何かたくらんでる)"}],
+    calm:[{ko:"나쁘지 않네.",ja:"悪くないね。"},{ko:"됐어, 내가 할게.",ja:"いいよ、やっとく。"}]},
+  kurimanju:{
+    excited:[{ko:"한 잔 더!!",ja:"もう一杯!!"},{ko:"이 안주, 최고다!!",ja:"このつまみ、最高!!"}],
+    question:[{ko:"너도 한 잔 할래?",ja:"おまえも一杯どう?"},{ko:"오늘 안주는 뭐지?",ja:"今日のつまみは何だ?"}],
+    hesitant:[{ko:"…취했나.",ja:"…酔ったかな。"},{ko:"(조용히 잔을 채움)",ja:"(静かにグラスを満たす)"}],
+    calm:[{ko:"이 정도면 좋은 밤이다.",ja:"これくらいがいい夜だ。"},{ko:"천천히 마시자.",ja:"ゆっくり飲もう。"}]},
+  kani:{
+    excited:[{ko:"책이 팔렸어요!!",ja:"本、売れました!!"},{ko:"새 책 들어왔어요!",ja:"新しい本、入りました!"}],
+    question:[{ko:"이 책 찾으세요?",ja:"この本、お探しですか?"},{ko:"저기… 계산은요…?",ja:"あの…お会計は…?"}],
+    hesitant:[{ko:"(작은 목소리로) 어서 오세요…",ja:"(小さな声で)いらっしゃいませ…"},{ko:"…모몬가 또 왔다.",ja:"…モモンガ、また来た。"}],
+    calm:[{ko:"천천히 구경하세요.",ja:"ゆっくり見ていってください。"},{ko:"오늘은 손님이 적네.",ja:"今日はお客さん少ないな。"}]}
+};
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+function readMood(raw, text){
+  if(/[?？]/.test(raw)) return "question";
+  const runs = (text.match(/(.)\1+/g) || []).reduce((m,r) => Math.max(m, r.length), 0);
+  if(/[!！]/.test(raw) || text.length >= 6 || runs >= 3) return "excited";
+  if(/(…|\.\.|・・)/.test(raw) || text.length <= 2) return "hesitant";
+  return "calm";
+}
+
 let lang = "ko", who = "usagi", last = null;
 const $ = s => document.querySelector(s);
 
@@ -284,9 +344,28 @@ function translate(raw){
     else text = text.slice(1);
   }
   if(!hits.length){
-    const u = UI[lang].unknown;
-    return {text:u[Math.floor(Math.random()*u.length)], conf: 3 + Math.floor(Math.random()*15), hits};
+    // 비슷한 소리 찾기: 입력 글자가 각 소리(원작 표기·한국어 표기)에 얼마나 들어 있는지
+    const chars = [...norm(raw)].filter(ch => !/[ーッ]/.test(ch));
+    let best = null, bestScore = 0, bestLen = 1;
+    for(const k of Object.keys(c.sounds)){
+      const forms = [norm(k), norm(KR[who][k].label)];
+      const set = new Set(forms.join("").replace(/[ーッャ]/g,""));
+      const score = chars.filter(ch => set.has(ch)).length;
+      if(score > bestScore){ best = k; bestScore = score; bestLen = Math.max(1, Math.min(...forms.map(f => f.replace(/[ーッャ]/g,"").length))); }
+    }
+    if(best && bestScore >= Math.max(1, Math.ceil(chars.length * 0.4))){
+      const n = Math.min(5, Math.max(1, Math.round(bestScore / bestLen)));
+      return {text: lineFor(Array(n).fill(best)), conf: 35 + Math.floor(Math.random()*25), hits:[best], mode:"fuzzy"};
+    }
+    // 그래도 없으면: 소리의 분위기로
+    const mood = readMood(raw, norm(raw));
+    return {text: pick(MOOD[who][mood])[lang], conf: 15 + Math.floor(Math.random()*20), hits:[], mode:"mood", mood};
   }
+  return {text: lineFor(hits), conf: 62 + Math.floor(Math.random()*37), hits:[...new Set(hits)], mode:"exact"};
+}
+
+function lineFor(hits){
+  const c = CHARS[who];
   const out = []; let i = 0;
   while(i < hits.length){
     let j = i; while(j < hits.length && hits[j] === hits[i]) j++;
@@ -295,7 +374,7 @@ function translate(raw){
     if(j - i >= 2) line += lang === "ko" ? " (×" + (j-i) + ")" : "(×" + (j-i) + ")";
     out.push(line); i = j;
   }
-  return {text: out.slice(0,3).join(" "), conf: 62 + Math.floor(Math.random()*37), hits:[...new Set(hits)]};
+  return out.slice(0,3).join(" ");
 }
 
 // 오리지널 마스코트: 헤드폰을 쓴 통역사 새 (원작과 무관한 창작)
@@ -308,21 +387,61 @@ function renderResult(){
   const c = CHARS[who];
   r.innerHTML = `<div class="interp">${BIRD}<span>${t.interp}</span></div><div class="sub"><small></small><span></span></div>
     <div class="meta"><span>${t.conf}</span><span class="meter"><i style="width:${res.conf}%"></i></span><span>${res.conf}%</span>
-    <button class="again" type="button" id="again">${t.again}</button></div>`;
+    <button class="again" type="button" id="again">${t.again}</button><button class="again" type="button" id="suggest">${t.suggest}</button></div>`;
   r.querySelector(".sub small").textContent = `${c.name[lang]}「${last}」`;
   r.querySelector(".sub span").textContent = res.text;
-  if(res.hits.length){
-    const ul = document.createElement("ul"); ul.className = "gloss";
-    ul.setAttribute("aria-label", t.glossTitle);
-    for(const h of res.hits){
-      const li = document.createElement("li");
-      const b = document.createElement("b"); b.textContent = label(who, h);
-      if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = h; b.appendChild(sm); }
-      li.append(b, c.sounds[h].gloss[lang]); ul.appendChild(li);
-    }
-    r.appendChild(ul);
+  const ul = document.createElement("ul"); ul.className = "gloss";
+  ul.setAttribute("aria-label", t.glossTitle);
+  if(res.mode !== "exact"){
+    const li = document.createElement("li");
+    li.textContent = res.mode === "fuzzy" ? t.fuzzyNote : t.moodNote + " (" + t.moods[res.mood] + ")";
+    ul.appendChild(li);
   }
+  for(const h of res.hits){
+    const li = document.createElement("li");
+    const b = document.createElement("b"); b.textContent = label(who, h);
+    if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = h; b.appendChild(sm); }
+    li.append(b, c.sounds[h].gloss[lang]); ul.appendChild(li);
+  }
+  r.appendChild(ul);
   $("#again").onclick = renderResult;
+  setupSuggest(c.name[lang], last, res.text);
+}
+
+// 통역 제안: 사이트 안에서 입력 → 구글 폼으로 뒤에서 전송 (사용자는 폼을 보지 않음)
+const FORM = "https://docs.google.com/forms/d/e/1FAIpQLSeBrlsntxKBGdX00FeWU4rlF2toezpak7ykPmIncDhvI0Hz0A/formResponse";
+function setupSuggest(name, input, text){
+  const t = UI[lang], btn = $("#suggest");
+  const panel = document.createElement("div"); panel.className = "panel"; panel.hidden = true;
+  panel.innerHTML = `<p class="was"></p><textarea maxlength="200" rows="3"></textarea>
+    <div class="panel-row"><span class="count">0/200</span><button type="button" class="cancel">${t.cancel}</button><button type="button" class="send" disabled>${t.send}</button></div>`;
+  panel.querySelector(".was").textContent = `${name}「${input}」→ “${text}”`;
+  const ta = panel.querySelector("textarea"), send = panel.querySelector(".send"), count = panel.querySelector(".count");
+  ta.placeholder = t.suggestPh;
+  $("#result .meta").after(panel);
+  btn.onclick = () => { panel.hidden = false; btn.hidden = true; ta.focus(); };
+  panel.querySelector(".cancel").onclick = () => { panel.hidden = true; btn.hidden = false; };
+  ta.addEventListener("input", () => { count.textContent = ta.value.length + "/200"; send.disabled = !ta.value.trim(); });
+  send.onclick = async () => {
+    send.disabled = true;
+    const body = new URLSearchParams({
+      "entry.1725835528": name,
+      "entry.778109498": input,
+      "entry.1923648688": text,
+      "entry.2034571606": ta.value.trim(),
+      "entry.1507123731": lang
+    });
+    try{
+      await fetch(FORM, {method:"POST", mode:"no-cors", body});
+    }catch(_){
+      let f = panel.querySelector(".fail");
+      if(!f){ f = document.createElement("p"); f.className = "fail"; panel.appendChild(f); }
+      f.textContent = t.failed; send.disabled = false; return;
+    }
+    panel.innerHTML = "";
+    const p = document.createElement("p"); p.className = "thanks"; p.textContent = t.thanks; panel.appendChild(p);
+    btn.hidden = false; btn.textContent = t.sent; btn.disabled = true;
+  };
 }
 
 function renderWho(){
