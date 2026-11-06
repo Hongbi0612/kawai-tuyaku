@@ -155,7 +155,6 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--chestnut); outl
   <div class="bubble">
     <div class="input-row">
       <input id="say" autocomplete="off" aria-label="sound">
-      <button class="icon-btn" id="mic" type="button" aria-label="mic" hidden>🎤</button>
     </div>
     <div class="chips" id="chips"></div>
     <p class="hint" id="t-hint"></p>
@@ -173,7 +172,7 @@ const UI = {
   ko:{
     title:"ちいかわ語<br>통역기",
     tag:"울음소리를 들려주면, 무슨 말인지 알려줄게요.",
-    hint:"소리 버튼을 누르거나, 직접 입력하거나, 🎤를 누르고 흉내 내 보세요. 한국어로 써도 돼요.",
+    hint:"소리 버튼을 누르거나, 입력 칸에 직접 쓰거나, 자판의 🎤를 눌러 흉내 내 보세요. 한국어로 써도 돼요.",
     hintNoMic:"소리 버튼을 누르거나, 직접 입력해 보세요.",
     placeholder:"예: 야하",
     dictate:"입력창을 누르고 키보드의 🎤로 말해 보세요. PC는 Win+H(Windows) 또는 Control 두 번(Mac).",
@@ -198,7 +197,7 @@ const UI = {
   ja:{
     title:"ちいかわ語<br>通訳機",
     tag:"鳴き声を聞かせてくれたら、なんて言ってるか教えるよ。",
-    hint:"音のボタンを押すか、入力するか、🎤を押してマネしてみて。",
+    hint:"音のボタンを押すか、入力欄に書くか、キーボードの🎤でマネしてみて。",
     hintNoMic:"音のボタンを押すか、入力してみて。",
     placeholder:"例:ヤハ",
     dictate:"入力欄をタップして、キーボードの🎤で話してみて。PCはWin+H(Windows)かControl 2回(Mac)。",
@@ -517,7 +516,7 @@ function render(){
   document.documentElement.lang = lang;
   document.title = lang === "ko" ? "ちいかわ語 통역기 (비공식)" : "ちいかわ語 通訳機(非公式)";
   $("#t-title").innerHTML = t.title; $("#t-tag").textContent = t.tag;
-  $("#t-hint").textContent = dictating ? t.dictate : t.hint;
+  $("#t-hint").textContent = t.hint;
   $("#say").placeholder = t.placeholder; $("#go").textContent = t.go;
   $("#t-foot").textContent = t.foot;
   document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
@@ -546,42 +545,6 @@ $("#say").addEventListener("focus", () => {
   const i = $("#say"); setTimeout(() => { try{ i.setSelectionRange(0, i.value.length); }catch(_){} }, 0);
 });
 
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-// claude.ai 안에서는 프레임에 마이크 권한이 없어 차단됨 → 키보드/OS 받아쓰기로 안내
-const micAllowed = (() => {
-  try{
-    const fp = document.permissionsPolicy || document.featurePolicy;
-    if(fp && typeof fp.allowedFeatures === "function") return fp.allowedFeatures().includes("microphone");
-  }catch(_){}
-  return true;
-})();
-let useSR = !!SR && micAllowed, dictating = false, autoTimer = null;
-
-function dictateMode(){
-  useSR = false; dictating = true;
-  $("#t-hint").textContent = UI[lang].dictate;
-  $("#say").focus();
-}
-const mic = $("#mic"); mic.hidden = false;
-let rec = null;
-mic.onclick = () => {
-  if(done && !rec){ $("#say").value = ""; done = false; updateGo(); }
-  if(!useSR){ dictateMode(); return; }
-  if(rec){ rec.stop(); return; }
-  rec = new SR(); rec.lang = lang === "ko" ? "ko-KR" : "ja-JP"; rec.interimResults = false; rec.maxAlternatives = 1;
-  mic.classList.add("rec"); $("#say").placeholder = UI[lang].listening;
-  rec.onresult = e => { const heard = e.results[0][0].transcript; $("#say").value = heard; updateGo(); bop(); last = heard; renderResult(); done = true; };
-  rec.onerror = e => { if(e && (e.error === "not-allowed" || e.error === "service-not-allowed")) dictateMode(); };
-  rec.onend = () => { rec = null; mic.classList.remove("rec"); $("#say").placeholder = UI[lang].placeholder; };
-  try{ rec.start(); }catch(_){ rec = null; mic.classList.remove("rec"); dictateMode(); }
-};
-// 받아쓰기로 글자가 들어오면 잠시 뒤 자동 통역
-$("#say").addEventListener("input", () => {
-  done = false;
-  if(!dictating) return;
-  clearTimeout(autoTimer);
-  autoTimer = setTimeout(() => { const v = $("#say").value.trim(); if(v){ last = v; renderResult(); done = true; } }, 1200);
-});
 render();
 </script>
 </body>
