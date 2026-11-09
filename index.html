@@ -10,7 +10,7 @@
 <style>
 :root{
   /* 원작 캐릭터 인상에서 가져온 색: 하얀 몸, 볼터치 핑크, 우사기 크림 옐로, 쿠리만쥬 밤색, 하치와레 하늘색, 연필선 같은 갈색 */
-  --bg:#fdf1f3; --paper:#ffffff; --ink:#4a3b3a; --soft:#6f5c59;
+  --bg:#fdf1f3; --paper:#ffffff; --ink:#4a3b3a; --soft:#8a7774;
   --cheek:#f6a9b9; --butter:#f8e49a; --chestnut:#b9875e; --sky:#b8d6ef; --kani:#f49ca6;
   --line:#4a3b3a; --sub-bg:#4a3b3a; --sub-fg:#ffffff; --chip:#fff6df;
   --accent:var(--cheek);
@@ -44,9 +44,8 @@ h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-
 .lang button{border:0; background:transparent; color:var(--ink); font:inherit; font-weight:700; padding:4px 12px; cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--ink); color:var(--bg)}
 
-.who{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:26px 0 14px}
-.who button{font:inherit; font-weight:700; color:var(--ink); background:var(--paper); border:2px solid var(--line); border-radius:999px; padding:7px 12px 7px 10px; display:flex; align-items:center; gap:8px; cursor:pointer; min-width:0; text-align:left}
-.who .nm{min-width:0; line-height:1.25; word-break:keep-all; overflow-wrap:anywhere}
+.who{display:flex; gap:8px; margin:26px 0 14px; flex-wrap:wrap}
+.who button{font:inherit; font-weight:700; color:var(--ink); background:var(--paper); border:2px solid var(--line); border-radius:999px; padding:7px 14px 7px 10px; display:flex; align-items:center; gap:8px; cursor:pointer}
 .who .bub{display:block; transform-origin:20% 100%}
 .bub.bop{animation:bop .4s ease-out}
 @keyframes bop{30%{transform:scale(1.18) rotate(-6deg)}60%{transform:scale(.95)}}
@@ -55,13 +54,14 @@ h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-
 .bubble{position:relative; background:var(--paper); border:3px solid var(--line); border-radius:28px; padding:18px 18px 16px; margin-top:6px}
 .bubble::after{content:""; position:absolute; left:42px; bottom:-17px; width:26px; height:26px; background:var(--paper); border-right:3px solid var(--line); border-bottom:3px solid var(--line); transform:skewX(-25deg) rotate(45deg)}
 .input-row{display:flex; gap:8px; align-items:center}
-
 #say{flex:1; min-width:0; font-family:"Mochiy Pop One","Zen Maru Gothic",sans-serif; font-size:clamp(1.4rem,6vw,1.9rem); color:var(--ink); background:transparent; border:0; border-bottom:2px dashed var(--soft); padding:4px 2px; outline:none}
 #say:focus-visible{border-bottom-color:var(--ink)}
 #say::placeholder{color:var(--soft); opacity:.6}
 .icon-btn{width:46px; height:46px; border-radius:50%; border:2px solid var(--line); background:var(--chip); color:var(--ink); font-size:1.2rem; cursor:pointer; flex-shrink:0}
 .icon-btn.rec{background:var(--cheek); animation:pulse 1s infinite}
 @keyframes pulse{50%{transform:scale(1.08)}}
+.level{height:8px; border-radius:999px; background:var(--chip); border:1.5px solid var(--line); margin-top:10px; overflow:hidden}
+.level i{display:block; height:100%; width:0; background:var(--accent); transition:width .06s}
 .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
 .chips button{font-family:"Mochiy Pop One",sans-serif; font-size:1rem; color:var(--ink); background:var(--chip); border:2px solid var(--line); border-radius:12px; padding:4px 12px; cursor:pointer}
 .chips button:active{transform:scale(.94)}
@@ -80,6 +80,9 @@ h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-
 .bird{flex-shrink:0; transform-origin:50% 100%; animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{50%{transform:rotate(-5deg)}}
 .sub{background:var(--sub-bg); color:var(--sub-fg); border-radius:6px; padding:16px 18px; font-size:1.15rem; font-weight:700; line-height:1.55; animation:in .35s ease-out}
+.sub{position:relative; padding-right:62px; cursor:pointer}
+.speak{position:absolute; right:12px; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; border:2px solid var(--sub-fg); background:transparent; font-size:1.05rem; cursor:pointer}
+.speak.on{background:var(--accent); border-color:var(--accent); animation:pulse 1s infinite}
 .sub small{display:block; font-weight:500; font-size:.8rem; opacity:.7; margin-bottom:4px}
 @keyframes in{from{opacity:0; transform:translateY(8px)}}
 .meta{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; font-size:.85rem; color:var(--soft)}
@@ -104,37 +107,6 @@ h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-
 footer{margin-top:44px; font-size:.78rem; color:var(--soft); line-height:1.7}
 button:focus-visible,input:focus-visible{outline:3px solid var(--chestnut); outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
-/* ---- 모바일 (폭 480px 이하) ---- */
-@media (max-width:480px){
-  main{padding:22px 14px 36px}
-  /* 1. 캐릭터: 2개씩 2줄, 말풍선 아이콘을 조금 작게 */
-  .who{gap:8px}
-  .who button{padding:6px 10px 6px 8px; gap:6px; font-size:.95rem}
-  .who .bub{width:42px; height:27px; flex-shrink:0}
-  /* 2. 소리 버튼: 한 줄 3칸 같은 폭, 일본어 표기는 아래 줄로 */
-  .chips{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
-  .chips button{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px 4px; line-height:1.25; min-width:0}
-  .chips button small{margin-left:0; font-size:.7em}
-  /* 4. 입력 칸 여백 */
-  .bubble{padding:14px 14px 14px; border-radius:24px}
-  .input-row{gap:10px}
-  .icon-btn{width:42px; height:42px; font-size:1.1rem}
-  .hint{font-size:.85rem}
-  .tag,.hint,footer{word-break:keep-all}
-}
-@media (max-width:360px){
-  .who button{font-size:.85rem; padding:6px 8px 6px 6px; gap:4px}
-  .who .bub{width:36px; height:23px}
-}
-.result{scroll-margin-top:12px}
-.gloss-card{margin-top:10px; background:var(--paper); background:color-mix(in srgb, var(--accent) 24%, var(--paper)); border:2px solid var(--line); border-radius:14px; padding:12px 14px; animation:in .35s ease-out}
-.gloss-card .gloss-h{margin:0 0 4px; font-size:.82rem; font-weight:700; color:var(--ink)}
-.gloss-card .gloss{margin:0; font-size:.95rem}
-.gloss-card .gloss li{padding:8px 0 4px; border-top:1px dashed var(--soft); word-break:keep-all; overflow-wrap:anywhere}
-.gloss-card .gloss li:first-child{border-top:0; padding-top:2px}
-.gloss-card .gloss b{display:block; font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-size:1.05rem; line-height:1.4}
-.gloss-card .gloss .desc{display:block; line-height:1.6}
-.gloss-card .gloss li.note{font-size:.82rem; color:var(--soft); padding-bottom:6px}
 </style>
 </head>
 <body>
@@ -155,7 +127,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--chestnut); outl
   <div class="bubble">
     <div class="input-row">
       <input id="say" autocomplete="off" aria-label="sound">
+      <button class="icon-btn" id="mic" type="button" aria-label="mic" hidden>🎤</button>
     </div>
+    <div class="level" id="level" hidden><i></i></div>
     <div class="chips" id="chips"></div>
     <p class="hint" id="t-hint"></p>
   </div>
@@ -172,7 +146,7 @@ const UI = {
   ko:{
     title:"ちいかわ語<br>통역기",
     tag:"울음소리를 들려주면, 무슨 말인지 알려줄게요.",
-    hint:"소리 버튼을 누르거나, 입력 칸에 직접 쓰거나, 자판의 🎤를 눌러 흉내 내 보세요. 한국어로 써도 돼요.",
+    hint:"소리 버튼을 누르거나, 직접 입력하거나, 🎤를 누르고 흉내 내 보세요. 한국어로 써도 돼요.",
     hintNoMic:"소리 버튼을 누르거나, 직접 입력해 보세요.",
     placeholder:"예: 야하",
     dictate:"입력창을 누르고 키보드의 🎤로 말해 보세요. PC는 Win+H(Windows) 또는 Control 두 번(Mac).",
@@ -181,13 +155,16 @@ const UI = {
     conf:"통역 자신감",
     again:"다르게 통역",
     interp:"통역사",
+    speak:"읽어주기",
+    noSound:"소리가 안 들렸어요. 스피커나 휴대폰을 마이크 가까이 대고 다시 해 보세요.",
+    heardBy:"소리 모양으로 들었어요: ", syl:"{n}번 끊김", longS:"길게", shortS:"짧게", rise:"끝이 올라감",
     suggest:"통역 제안하기",
     suggestPh:"내 생각엔 이런 뜻이에요",
     send:"보내기", cancel:"취소",
     thanks:"제안 고마워요! 통역사가 공부해 둘게요.",
     sent:"보냈어요",
     failed:"전송에 실패했어요. 잠시 후 다시 보내 주세요.",
-    glossTitle:"💬 이 소리는요",
+    glossTitle:"이 소리, 원작에서는",
     fuzzyNote:"딱 맞는 소리는 없어서, 가장 비슷한 소리로 통역했어요.",
     moodNote:"사전에 없는 소리라, 소리의 분위기로 통역했어요.",
     moods:{excited:"신남",question:"궁금함",hesitant:"머뭇거림",calm:"평온"},
@@ -197,7 +174,7 @@ const UI = {
   ja:{
     title:"ちいかわ語<br>通訳機",
     tag:"鳴き声を聞かせてくれたら、なんて言ってるか教えるよ。",
-    hint:"音のボタンを押すか、入力欄に書くか、キーボードの🎤でマネしてみて。",
+    hint:"音のボタンを押すか、入力するか、🎤を押してマネしてみて。",
     hintNoMic:"音のボタンを押すか、入力してみて。",
     placeholder:"例:ヤハ",
     dictate:"入力欄をタップして、キーボードの🎤で話してみて。PCはWin+H(Windows)かControl 2回(Mac)。",
@@ -206,13 +183,16 @@ const UI = {
     conf:"通訳の自信",
     again:"別の通訳",
     interp:"通訳さん",
+    speak:"読み上げ",
+    noSound:"音が聞こえなかったよ。スピーカーをマイクに近づけて、もう一回やってみて。",
+    heardBy:"音のかたちで聞きました:", syl:"{n}音", longS:"長め", shortS:"短め", rise:"語尾が上がる",
     suggest:"通訳を提案する",
     suggestPh:"わたしはこういう意味だと思う",
     send:"送る", cancel:"やめる",
     thanks:"提案ありがとう!通訳さんが勉強しておくね。",
     sent:"送りました",
     failed:"送信できませんでした。少したってからもう一度送ってね。",
-    glossTitle:"💬 この音は",
+    glossTitle:"この音、原作では",
     fuzzyNote:"ぴったりの音がないので、いちばん近い音で通訳しました。",
     moodNote:"辞書にない音なので、音の雰囲気で通訳しました。",
     moods:{excited:"興奮",question:"疑問",hesitant:"ためらい",calm:"おだやか"},
@@ -416,18 +396,25 @@ function renderResult(){
   const r = $("#result"), t = UI[lang];
   if(!last){ r.innerHTML = `<div class="empty">${BIRD}<p>${t.empty}</p></div>`; return; }
   const res = translate(last);
+  if(heard) res.conf = 40 + Math.floor(Math.random()*30);
   const c = CHARS[who];
-  r.innerHTML = `<div class="interp">${BIRD}<span>${t.interp}</span></div><div class="sub"><small></small><span></span></div>
-    <div class="gloss-card"><p class="gloss-h"></p></div>
+  r.innerHTML = `<div class="interp">${BIRD}<span>${t.interp}</span></div><div class="sub"><small></small><span></span><button class="speak" type="button" aria-label="${t.speak}">🔊</button></div>
     <div class="meta"><span>${t.conf}</span><span class="meter"><i style="width:${res.conf}%"></i></span><span>${res.conf}%</span>
     <button class="again" type="button" id="again">${t.again}</button><button class="again" type="button" id="suggest">${t.suggest}</button></div>`;
   r.querySelector(".sub small").textContent = `${c.name[lang]}「${last}」`;
   r.querySelector(".sub span").textContent = res.text;
+  setupSpeak(res.text);
   const ul = document.createElement("ul"); ul.className = "gloss";
   ul.setAttribute("aria-label", t.glossTitle);
-  if(res.mode !== "exact"){
+  if(heard){
     const li = document.createElement("li");
-    li.className = "note";
+    const parts = [t.syl.replace("{n}", heard.syll), heard.long ? t.longS : t.shortS];
+    if(heard.rising) parts.push(t.rise);
+    li.textContent = t.heardBy + parts.join(" · ");
+    ul.appendChild(li);
+  }
+  if(res.mode !== "exact" && !heard){
+    const li = document.createElement("li");
     li.textContent = res.mode === "fuzzy" ? t.fuzzyNote : t.moodNote + " (" + t.moods[res.mood] + ")";
     ul.appendChild(li);
   }
@@ -435,14 +422,10 @@ function renderResult(){
     const li = document.createElement("li");
     const b = document.createElement("b"); b.textContent = label(who, h);
     if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = h; b.appendChild(sm); }
-    const d = document.createElement("span"); d.className = "desc"; d.textContent = c.sounds[h].gloss[lang];
-    li.append(b, d); ul.appendChild(li);
+    li.append(b, c.sounds[h].gloss[lang]); ul.appendChild(li);
   }
-  // 소리 설명: 통역 문장 바로 아래 카드에
-  const card = r.querySelector(".gloss-card");
-  card.querySelector(".gloss-h").textContent = t.glossTitle;
-  card.appendChild(ul);
-  $("#again").onclick = () => { renderResult(); scrollToResult(); };
+  r.appendChild(ul);
+  $("#again").onclick = renderResult;
   setupSuggest(c.name[lang], last, res.text);
 }
 
@@ -482,6 +465,47 @@ function setupSuggest(name, input, text){
   };
 }
 
+// 통역 문장 읽어주기 (브라우저 내장 음성 합성, 🔊를 눌렀을 때만)
+const VOICE = {
+  chiikawa:{pitch:2.0, rate:0.9},
+  usagi:{pitch:1.7, rate:1.25},
+  kurimanju:{pitch:0.6, rate:0.85},
+  kani:{pitch:1.6, rate:1.0}
+};
+const canSpeak = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+function speakText(text, btn){
+  const synth = window.speechSynthesis;
+  if(synth.speaking || synth.pending){ synth.cancel(); btn.classList.remove("on"); return; }
+  const clean = text.replace(/[（(]×\d+[)）]/g, "").trim();
+  // 괄호 속마음은 괄호를 빼고 조금 작게
+  const parts = [];
+  clean.split(/([（(][^)）]*[)）])/).forEach(seg => {
+    const inner = seg.match(/^[（(](.*)[)）]$/);
+    const str = (inner ? inner[1] : seg).trim();
+    if(str) parts.push({str, soft: !!inner});
+  });
+  if(!parts.length) return;
+  const code = lang === "ko" ? "ko" : "ja";
+  const voice = synth.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith(code));
+  const vp = VOICE[who];
+  btn.classList.add("on");
+  parts.forEach((pt, i) => {
+    const u = new SpeechSynthesisUtterance(pt.str);
+    u.lang = code === "ko" ? "ko-KR" : "ja-JP";
+    if(voice) u.voice = voice;
+    u.pitch = vp.pitch; u.rate = vp.rate; u.volume = pt.soft ? 0.6 : 1;
+    if(i === parts.length - 1){ u.onend = u.onerror = () => btn.classList.remove("on"); }
+    synth.speak(u);
+  });
+}
+function setupSpeak(text){
+  const btn = $("#result .speak");
+  if(!canSpeak){ btn.remove(); return; }
+  btn.onclick = e => { e.stopPropagation(); speakText(text, btn); };
+  $("#result .sub").onclick = () => speakText(text, btn);
+}
+if(canSpeak) window.speechSynthesis.getVoices();
+
 function renderWho(){
   const box = $("#who"); box.innerHTML = "";
   for(const [id,c] of Object.entries(CHARS)){
@@ -489,7 +513,7 @@ function renderWho(){
     b.type = "button"; b.setAttribute("aria-pressed", id === who);
     const sig = (lang === "ko" ? KR[id][Object.keys(c.sounds)[0]].label : Object.keys(c.sounds)[0]);
     b.innerHTML = `<svg class="bub" viewBox="0 0 64 40" width="52" height="33" aria-hidden="true"><path d="M8 3h48a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H22l-9 7 2-7H8a6 6 0 0 1-6-6V9a6 6 0 0 1 6-6z" fill="${c.color}" stroke="#4a3b3a" stroke-width="2.5" stroke-linejoin="round"/><text x="32" y="22" text-anchor="middle" font-family="Mochiy Pop One, sans-serif" font-size="${sig.length > 3 ? 11 : 13}" fill="#4a3b3a">${sig}</text></svg>`;
-    const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = c.name[lang]; b.appendChild(nm);
+    b.append(c.name[lang]);
     b.onclick = () => { who = id; $("#say").value = ""; last = null; render(); };
     box.appendChild(b);
   }
@@ -501,7 +525,7 @@ function renderChips(){
     const b = document.createElement("button");
     b.type = "button"; b.textContent = label(who, s);
     if(lang === "ko"){ const sm = document.createElement("small"); sm.textContent = s; b.appendChild(sm); }
-    b.onclick = () => { const i = $("#say"); i.value = (i.value && !done ? i.value + " " : "") + label(who, s); done = false; updateGo(); bop(); };
+    b.onclick = () => { const i = $("#say"); i.value = (i.value ? i.value + " " : "") + label(who, s); updateGo(); bop(); };
     box.appendChild(b);
   }
 }
@@ -516,7 +540,7 @@ function render(){
   document.documentElement.lang = lang;
   document.title = lang === "ko" ? "ちいかわ語 통역기 (비공식)" : "ちいかわ語 通訳機(非公式)";
   $("#t-title").innerHTML = t.title; $("#t-tag").textContent = t.tag;
-  $("#t-hint").textContent = t.hint;
+  $("#t-hint").textContent = dictating ? t.dictate : t.hint;
   $("#say").placeholder = t.placeholder; $("#go").textContent = t.go;
   $("#t-foot").textContent = t.foot;
   document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
@@ -526,25 +550,148 @@ function render(){
 document.querySelectorAll(".lang button").forEach(b => b.onclick = () => { lang = b.dataset.lang; render(); });
 $("#say").addEventListener("input", () => { updateGo(); bop(); });
 $("#say").addEventListener("keydown", e => { if(e.key === "Enter" && $("#say").value.trim()) $("#go").click(); });
-// 통역 결과로 스크롤: 결과가 이미 화면에 다 보이면 움직이지 않음. 「동작 줄이기」 설정이면 애니메이션 없이 이동.
-function scrollToResult(){
-  const r = $("#result"); if(!r || !r.firstElementChild) return;
-  requestAnimationFrame(() => {
-    const box = r.getBoundingClientRect();
-    if(box.top >= 0 && box.bottom <= window.innerHeight) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    r.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"});
+let heard = null;
+$("#go").onclick = () => { heard = null; last = $("#say").value.trim(); renderResult(); };
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+// claude.ai 안에서는 프레임에 마이크 권한이 없어 차단됨 → 키보드/OS 받아쓰기로 안내
+const micAllowed = (() => {
+  try{
+    const fp = document.permissionsPolicy || document.featurePolicy;
+    if(fp && typeof fp.allowedFeatures === "function") return fp.allowedFeatures().includes("microphone");
+  }catch(_){}
+  return true;
+})();
+let useSR = !!SR && micAllowed, dictating = false, autoTimer = null;
+
+function dictateMode(){
+  useSR = false; dictating = true;
+  $("#t-hint").textContent = UI[lang].dictate;
+  $("#say").focus();
+}
+// 소리 모양 → 캐릭터 소리 후보 (음성 인식이 못 알아들은 영상 소리·울음소리용)
+const SHAPES = {
+  chiikawa:{ trill:["アッアッ"], rising:["ワァ"], long:["ワァ"], two:["イヤ","ヤダ"], one:["フ"] },
+  usagi:{ trill:["プルル","プルャ"], rising:["ハァ"], long:["フゥン"], two:["ヤハ","ウラ"], one:["ウラ","ハァ"] },
+  kurimanju:{ trill:["ハァーッ"], rising:["ハァーッ"], long:["ハァーッ"], two:["ハァーッ"], one:["ハァーッ"] },
+  kani:{ trill:["クスッ"], rising:["ワァ"], long:["ワァ"], two:["クスッ","ワァ"], one:["クスッ"] }
+};
+function pickShape(h){
+  const m = SHAPES[who];
+  const kind = h.syll >= 3 ? "trill" : h.rising ? "rising" : h.long ? "long" : h.syll === 2 ? "two" : "one";
+  return pick(m[kind]);
+}
+function setLevel(v){ $("#level i").style.width = Math.round(v*100) + "%"; }
+
+function detectPitch(b, sr){
+  const minL = Math.floor(sr/1200), maxL = Math.floor(sr/120);
+  let best = 0, bestL = 0;
+  for(let L = minL; L <= maxL; L++){
+    let sum = 0;
+    for(let i = 0; i < b.length - L; i += 2) sum += b[i]*b[i+L];
+    if(sum > best){ best = sum; bestL = L; }
+  }
+  return bestL ? sr/bestL : 0;
+}
+function analyzeFrames(frames){
+  const segs = []; let cur = null;
+  for(const f of frames){
+    if(!f.voiced) continue;
+    if(cur && f.t - cur.end <= 80){ cur.end = f.t; cur.fr.push(f); }
+    else { cur = {start:f.t, end:f.t, fr:[f]}; segs.push(cur); }
+  }
+  const real = segs.filter(x => x.fr.length >= 2);
+  if(!real.length) return null;
+  const avg = a => a.reduce((x,y) => x+y, 0) / a.length;
+  const lastSeg = real[real.length-1];
+  const p = lastSeg.fr.map(f => f.pitch).filter(x => x > 0);
+  let rising = false;
+  if(p.length >= 6){ const k = Math.floor(p.length/3); rising = avg(p.slice(-k)) > avg(p.slice(0,k)) * 1.12; }
+  return { syll: real.length, long: Math.max(...real.map(x => x.end - x.start)) > 550, rising };
+}
+let stopFlag = false;
+async function listenShape(maxMs){
+  const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ac = new AC(); if(ac.state === "suspended") await ac.resume();
+  const an = ac.createAnalyser(); an.fftSize = 2048;
+  ac.createMediaStreamSource(stream).connect(an);
+  const buf = new Float32Array(an.fftSize), frames = [], warm = [], t0 = performance.now();
+  let floor = null, lastVoice = null;
+  return new Promise(resolve => {
+    const tick = () => {
+      an.getFloatTimeDomainData(buf);
+      let sum = 0; for(const v of buf) sum += v*v;
+      const rms = Math.sqrt(sum/buf.length), now = performance.now() - t0;
+      if(now < 250) warm.push(rms);
+      else if(floor === null){ warm.sort((a,b) => a-b); floor = warm[Math.floor(warm.length/2)] || 0; }
+      const voiced = floor !== null && rms > Math.max(0.012, floor*2.5);
+      frames.push({t:now, voiced, pitch: voiced ? detectPitch(buf, ac.sampleRate) : 0});
+      setLevel(Math.min(1, rms/0.15));
+      if(voiced) lastVoice = now;
+      if(stopFlag || now > maxMs || (lastVoice !== null && now - lastVoice > 900)){
+        stream.getTracks().forEach(tr => tr.stop()); ac.close(); setLevel(0);
+        resolve(analyzeFrames(frames));
+      } else setTimeout(tick, 20);
+    };
+    setTimeout(tick, 20);
   });
 }
-// 통역이 한 번 끝나면(done) 다음 소리 버튼·🎤는 입력을 새로 시작한다. 통역 전에는 소리 버튼을 이어 붙여 조합할 수 있다.
-let done = false;
-$("#go").onclick = () => { last = $("#say").value.trim(); renderResult(); scrollToResult(); done = true; };
-// 통역 후 입력 칸을 누르면 기존 글자를 선택해 두어, 바로 치거나 받아쓰면 덮어쓰게 한다
-$("#say").addEventListener("focus", () => {
-  if(!done) return;
-  const i = $("#say"); setTimeout(() => { try{ i.setSelectionRange(0, i.value.length); }catch(_){} }, 0);
-});
 
+const mic = $("#mic"); mic.hidden = false;
+let rec = null, listening = false;
+function srOnly(){
+  if(rec){ rec.stop(); return; }
+  rec = new SR(); rec.lang = lang === "ko" ? "ko-KR" : "ja-JP"; rec.interimResults = false; rec.maxAlternatives = 1;
+  mic.classList.add("rec"); $("#say").placeholder = UI[lang].listening;
+  rec.onresult = e => { const h = e.results[0][0].transcript; heard = null; $("#say").value = h; updateGo(); bop(); last = h; renderResult(); };
+  rec.onerror = e => { if(e && (e.error === "not-allowed" || e.error === "service-not-allowed")) dictateMode(); };
+  rec.onend = () => { rec = null; mic.classList.remove("rec"); $("#say").placeholder = UI[lang].placeholder; };
+  try{ rec.start(); }catch(_){ rec = null; mic.classList.remove("rec"); dictateMode(); }
+}
+mic.onclick = async () => {
+  const canAudio = micAllowed && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+  if(!canAudio){ if(useSR) srOnly(); else dictateMode(); return; }
+  if(listening){ stopFlag = true; return; }
+  listening = true; stopFlag = false;
+  mic.classList.add("rec"); $("#say").placeholder = UI[lang].listening; $("#level").hidden = false;
+  $("#t-hint").textContent = UI[lang].hint;
+  // 음성 인식(말→글자)과 소리 모양 분석을 함께
+  let text = null, r = null;
+  if(SR){
+    try{
+      r = new SR(); r.lang = lang === "ko" ? "ko-KR" : "ja-JP"; r.interimResults = false; r.maxAlternatives = 1;
+      r.onresult = e => { text = e.results[0][0].transcript; };
+      r.onerror = () => {};
+      r.start();
+    }catch(_){ r = null; }
+  }
+  let shape = null, blocked = false;
+  try{ shape = await listenShape(6000); }
+  catch(_){ blocked = true; }
+  if(r){ try{ r.stop(); }catch(_){} await new Promise(ok => setTimeout(ok, 700)); }
+  listening = false; mic.classList.remove("rec"); $("#level").hidden = true;
+  $("#say").placeholder = UI[lang].placeholder;
+  if(blocked && !text){ dictateMode(); return; }
+
+  // 알아들은 글자가 사전·비슷한 소리에 걸리면 그걸, 아니면 소리 모양을 우선
+  const textUseful = text && translate(text).mode !== "mood";
+  if(text && (textUseful || !shape)){
+    heard = null; $("#say").value = text; last = text;
+  } else if(shape){
+    const k = label(who, pickShape(shape));
+    heard = shape; $("#say").value = k; last = k;
+  } else {
+    $("#t-hint").textContent = UI[lang].noSound; return;
+  }
+  updateGo(); bop(); renderResult();
+};
+// 받아쓰기로 글자가 들어오면 잠시 뒤 자동 통역
+$("#say").addEventListener("input", () => {
+  if(!dictating) return;
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() => { const v = $("#say").value.trim(); if(v){ heard = null; last = v; renderResult(); } }, 1200);
+});
 render();
 </script>
 </body>
