@@ -44,8 +44,11 @@ h1{font-family:"Mochiy Pop One","Gowun Dodum",sans-serif; font-weight:400; font-
 .lang button{border:0; background:transparent; color:var(--ink); font:inherit; font-weight:700; padding:4px 12px; cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--ink); color:var(--bg)}
 
-.who{display:flex; gap:8px; margin:26px 0 14px; flex-wrap:wrap}
-.who button{font:inherit; font-weight:700; color:var(--ink); background:var(--paper); border:2px solid var(--line); border-radius:999px; padding:7px 14px 7px 10px; display:flex; align-items:center; gap:8px; cursor:pointer}
+.who{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:26px 0 14px}
+.who button{font:inherit; font-weight:700; color:var(--ink); background:var(--paper); border:2px solid var(--line); border-radius:999px; padding:7px 12px 7px 10px; display:flex; align-items:center; gap:8px; min-width:0; cursor:pointer; text-align:left}
+.who .nm{display:flex; flex-direction:column; line-height:1.25; min-width:0}
+.who .nm small{font-weight:500; font-size:.72em; opacity:.7}
+.who .bub{flex-shrink:0}
 .who .bub{display:block; transform-origin:20% 100%}
 .bub.bop{animation:bop .4s ease-out}
 @keyframes bop{30%{transform:scale(1.18) rotate(-6deg)}60%{transform:scale(.95)}}
@@ -157,7 +160,6 @@ const UI = {
     interp:"통역사",
     speak:"읽어주기",
     noSound:"소리가 안 들렸어요. 스피커나 휴대폰을 마이크 가까이 대고 다시 해 보세요.",
-    heardBy:"소리 모양으로 들었어요: ", syl:"{n}번 끊김", longS:"길게", shortS:"짧게", rise:"끝이 올라감",
     suggest:"통역 제안하기",
     suggestPh:"내 생각엔 이런 뜻이에요",
     send:"보내기", cancel:"취소",
@@ -185,7 +187,6 @@ const UI = {
     interp:"通訳さん",
     speak:"読み上げ",
     noSound:"音が聞こえなかったよ。スピーカーをマイクに近づけて、もう一回やってみて。",
-    heardBy:"音のかたちで聞きました:", syl:"{n}音", longS:"長め", shortS:"短め", rise:"語尾が上がる",
     suggest:"通訳を提案する",
     suggestPh:"わたしはこういう意味だと思う",
     send:"送る", cancel:"やめる",
@@ -270,7 +271,7 @@ const CHARS = {
           {ko:"안주가 너무 맛있어서 할 말이 없다.", ja:"つまみがうますぎて言葉が出ない。"},
           {ko:"…좋다.", ja:"…いいな。"}]}
     }},
-  kani:{ name:{ko:"카니짱(고서점)",ja:"古本屋(カニちゃん)"}, color:"#f49ca6", accent:"#f49ca6",
+  kani:{ name:{ko:"카니짱",ja:"カニちゃん"}, color:"#f49ca6", accent:"#f49ca6",
     sounds:{
       "ワァ":{ gloss:{ko:"애니에서 책값을 못 받고 당황할 때 낸 소리.", ja:"アニメで本の代金をもらえず、あせったときの声。"},
         lines:[
@@ -406,13 +407,6 @@ function renderResult(){
   setupSpeak(res.text);
   const ul = document.createElement("ul"); ul.className = "gloss";
   ul.setAttribute("aria-label", t.glossTitle);
-  if(heard){
-    const li = document.createElement("li");
-    const parts = [t.syl.replace("{n}", heard.syll), heard.long ? t.longS : t.shortS];
-    if(heard.rising) parts.push(t.rise);
-    li.textContent = t.heardBy + parts.join(" · ");
-    ul.appendChild(li);
-  }
   if(res.mode !== "exact" && !heard){
     const li = document.createElement("li");
     li.textContent = res.mode === "fuzzy" ? t.fuzzyNote : t.moodNote + " (" + t.moods[res.mood] + ")";
@@ -513,7 +507,11 @@ function renderWho(){
     b.type = "button"; b.setAttribute("aria-pressed", id === who);
     const sig = (lang === "ko" ? KR[id][Object.keys(c.sounds)[0]].label : Object.keys(c.sounds)[0]);
     b.innerHTML = `<svg class="bub" viewBox="0 0 64 40" width="52" height="33" aria-hidden="true"><path d="M8 3h48a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H22l-9 7 2-7H8a6 6 0 0 1-6-6V9a6 6 0 0 1 6-6z" fill="${c.color}" stroke="#4a3b3a" stroke-width="2.5" stroke-linejoin="round"/><text x="32" y="22" text-anchor="middle" font-family="Mochiy Pop One, sans-serif" font-size="${sig.length > 3 ? 11 : 13}" fill="#4a3b3a">${sig}</text></svg>`;
-    b.append(c.name[lang]);
+    const nm = document.createElement("span"); nm.className = "nm";
+    const [main, sub] = c.name[lang].split(/[（(]/);
+    nm.append(main);
+    if(sub){ const sm = document.createElement("small"); sm.textContent = sub.replace(/[）)]/, ""); nm.appendChild(sm); }
+    b.appendChild(nm);
     b.onclick = () => { who = id; $("#say").value = ""; last = null; render(); };
     box.appendChild(b);
   }
